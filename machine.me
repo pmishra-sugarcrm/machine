@@ -1,0 +1,321 @@
+#!/bin/bash
+
+# Run via:
+# $ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.me)" 2>&1 | tee ~/.machine.me.log
+
+fancy_echo() {
+    local fmt="$1"
+    shift
+
+    # shellcheck disable=SC2059
+    printf "\\n$fmt\\n" "$@"
+}
+
+append_to_file() {
+    local file="$1"
+    local text="$2"
+
+    if [ ! -f "$file" ]; then
+        touch "$file"
+    fi
+
+    if ! grep -qs "^$text$" "$file"; then
+        printf "\\n%s\\n" "$text" >>"$file"
+    fi
+}
+
+add_to_path() {
+    append_to_file "$HOME/.localrc" "export PATH=\"$1:\$PATH\""
+    export PATH="$1:$PATH"
+}
+
+go_home() {
+    cd "$HOME"
+}
+
+wait_for_user() {
+    read -n 1 -s -r -p "Press any key to continue..."
+}
+
+github_ssh_key() {
+    fancy_echo "Following https://help.github.com/en/articles/connecting-to-github-with-ssh to connect to Github with SSH ..."
+
+    ssh-keygen -t rsa -b 4096
+    eval "$(ssh-agent -s)"
+
+    # TODO: Only append to ~/.ssh/config if those lines aren't already there.
+    cat <<EOF >>~/.ssh/config
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_rsa
+EOF
+
+    ssh-add -K "$HOME/.ssh/id_rsa"
+}
+
+homebrew_install_or_update() {
+    if ! command -v brew >/dev/null; then
+        fancy_echo "Installing Homebrew ..."
+        curl -fsSL "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
+
+        append_to_file "$HOME/.localrc" "# Recommended by brew doctor"
+
+        add_to_path "/usr/local/bin"
+    else
+        fancy_echo "Updating Homebrew ..."
+        brew update
+    fi
+}
+
+# shellcheck disable=SC2154
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+
+set -e
+
+cat <<EOF
+Hi, $USER.
+Let's bootstrap your macOS machine.
+Before we get started, sign into the App Store. You should also take this time to optionally sign into iCloud.
+Go ahead. I'll wait for you.
+EOF
+wait_for_user
+
+fancy_echo "It is recommended that you update all of your software in the App Store and upgrade macOS if available. You can re-run this script when you are ready. Do you want to continue? (y/n)?"
+old_stty_cfg=$(stty -g)
+stty raw -echo
+answer=$(while ! head -c 1 | grep -i '[ny]'; do true; done)
+stty "$old_stty_cfg"
+if echo "$answer" | grep -iq "^n"; then
+    fancy_echo "Come back when you're done."
+    exit 0
+fi
+
+# Start at home.
+go_home
+
+# source: https://brettterpstra.com/2018/09/26/shell-tricks-toggling-dark-mode-from-terminal/
+fancy_echo "Going dark ..."
+osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to true'
+fancy_echo "... Ahhhh, much better."
+
+# Github SSH key.
+if [ -f "$HOME/.ssh/id_rsa" ]; then
+    fancy_echo "It looks like you already have an SSH key. Do you need to generate a new one? (y/n)?"
+    old_stty_cfg=$(stty -g)
+    stty raw -echo
+    answer=$(while ! head -c 1 | grep -i '[ny]'; do true; done)
+    stty "$old_stty_cfg"
+    if echo "$answer" | grep -iq "^y"; then
+        github_ssh_key
+    fi
+else
+    github_ssh_key
+fi
+
+pbcopy <"$HOME/.ssh/id_rsa.pub"
+fancy_echo "... Your SSH key was copied to your clipboard. If needed, go to https://github.com/settings/ssh/new to add your SSH key to Github. I'll wait for you."
+wait_for_user
+
+homebrew_install_or_update
+
+fancy_echo "Can't live without zsh ..."
+
+brew install zsh
+chsh -s /bin/zsh
+
+fancy_echo "... and better yet, oh my zsh!"
+curl -fsSL "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" | sh
+
+fancy_echo "... with some plugins"
+
+# zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+
+# zsh-completions
+git clone https://github.com/zsh-users/zsh-completions "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-completions"
+
+# zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+
+append_to_file "$HOME/.localrc" ""
+append_to_file "$HOME/.localrc" "# zsh-syntax-highlighting must be last"
+append_to_file "$HOME/.localrc" "# Others worth considering: git-prompt, jump (Does it overlap with autojump?), kubectrl, minikube, per-directory-history (Does it overlap with dirhistory or history?), pj (Does it overlap with autojump?), thefuck (Conflicts with sudo.), vagrant-prompt, z (Does it overlap with autojump?), zsh-navigation-tools"
+append_to_file "$HOME/.localrc" "plugins=(asdf autojump colored-man-pages command-not-found common-aliases compleat copybuffer copydir copyfile cp dirhistory dirpersist docker docker-compose dotenv extract git golang heroku history iwhois last-working-dir lol man npm osx perms sublime sudo themes timer tmux urltools vagrant vault web-search yarn wd zsh_reload zsh-history-substring-search zsh-autosuggestions zsh-completions zsh-syntax-highlighting)"
+
+fancy_echo "... and better command history searching with arrow keys"
+append_to_file "$HOME/.localrc" ""
+append_to_file "$HOME/.localrc" "# Search history with arrow keys"
+append_to_file "$HOME/.localrc" "autoload -U up-line-or-beginning-search"
+append_to_file "$HOME/.localrc" "autoload -U down-line-or-beginning-search"
+append_to_file "$HOME/.localrc" "zle -N up-line-or-beginning-search"
+append_to_file "$HOME/.localrc" "zle -N down-line-or-beginning-search"
+append_to_file "$HOME/.localrc" "bindkey \"^[[A\" up-line-or-beginning-search # Up"
+append_to_file "$HOME/.localrc" "bindkey \"^[[B\" down-line-or-beginning-search # Down"
+fancy_echo "... learn how to search your command history at https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys"
+
+# Add ~/.localrc to ~/.zshrc.
+append_to_file "$HOME/.zshrc" "source \$HOME/.localrc"
+
+fancy_echo "Let's have a round of the usual brews ..."
+brew bundle --file=- <<EOF
+cask_args appdir: "/Applications"
+
+tap "homebrew/command-not-found"
+
+brew "ack"
+brew "base64"
+brew "cheat"
+brew "closure-linter"
+brew "coreutils"
+brew "dateutils"
+brew "ffind"
+brew "gist"
+brew "git"
+brew "grc"
+brew "grep"
+brew "handbrake"
+brew "jq"
+brew "openssl"
+brew "osxutils"
+brew "parallel"
+brew "reattach-to-user-namespace"
+brew "rename"
+brew "shellcheck"
+brew "the_silver_searcher"
+brew "tmux"
+brew "vagrant-completion"
+brew "vim"
+brew "wget"
+brew "yarn"
+
+cask "amazon-photos"
+cask "anki"
+cask "appcleaner"
+cask "docker"
+cask "dropbox"
+cask "firefox"
+cask "gimp"
+cask "google-chrome"
+cask "gpg-suite"
+cask "grammarly"
+cask "logitech-myharmony"
+cask "netspot"
+cask "ngrok"
+cask "onedrive"
+cask "plex-media-player"
+cask "postman"
+cask "sequel-pro"
+cask "sourcetree"
+cask "sublime-text"
+cask "vagrant"
+cask "vagrant-manager"
+cask "virtualbox"
+cask "visual-studio-code"
+cask "vlc"
+
+mas "1password", id: 1333542190
+mas "amphetamine", id: 937984704
+mas "evernote", id: 406056744
+mas "slack", id: 803453959
+EOF
+fancy_echo "... now we're feeling it! w00t!"
+
+fancy_echo "Writing to NTFS drives is a must ..."
+# https://www.howtogeek.com/236055/how-to-write-to-ntfs-drives-on-a-mac/
+# TODO
+fancy_echo "... achievement unlocked!"
+
+append_to_file "$HOME/.localrc" ""
+append_to_file "$HOME/.localrc" "# Add Visual Studio Code (code)"
+add_to_path "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+fancy_echo "Now you can use \`code\` in your terminal to launch Visual Studio Code"
+
+fancy_echo "Let me configure Git for you..."
+read -r -p "What is your name?" username
+git config --global user.name "$username"
+read -r -p "What is your email address?" email
+git config --global user.email "$email"
+git config --global.credential.helper osxkeychain
+git config --global.alias.amend "commit --amend"
+git config --global.alias.b branch
+git config --global.alias.co checkout
+git config --global.alias.cob "checkout -b"
+git config --global.alias.cp "cherry-pick"
+git config --global.alias.r "remote -v"
+git config --global.alias.ra "remote add"
+git config --global.alias.rb "rebase -i"
+git config --global.alias.smi "submodule init"
+git config --global.alias.smu "submodule update"
+git config --global.alias.st status
+git config --global.alias.unstage "reset --soft HEAD^"
+git config --global core.autocrlf input
+git config --global core.editor "code --wait"
+git config --global core.whitespace -blank-at-eof,tab-in-indent
+git config --global diff.tool vscode
+git config --global difftool.vscode.cmd "code --wait --diff $LOCAL $REMOTE"
+git config --global difftool.prompt false
+git config --global help.autocorrect 1
+git config --global mergetool.keepBackup false
+git config --global push.default simple
+
+# Always ignore these files.
+git config --global core.excludesfile ~/.gitignore
+append_to_file "$HOME/.gitignore" "*~"
+append_to_file "$HOME/.gitignore" ".*.swp"
+append_to_file "$HOME/.gitignore" ".DS_Store"
+
+fancy_echo "... Git configurations live at $HOME/.gitconfig"
+
+fancy_echo "Let's get logging into $(gist) out of the way ..."
+gist --login
+fancy_echo "... now we can move on from Git"
+
+fancy_echo "Installing asdf for managing language & runtime versions ..."
+brew bundle --file=- <<EOF
+brew "asdf"
+brew "autoconf"
+brew "automake"
+brew "coreutils"
+brew "gpg"
+brew "libtool"
+brew "libxslt"
+brew "libyaml"
+brew "openssl"
+brew "readline"
+brew "unixodbc"
+EOF
+
+append_to_file "$HOME/.localrc" ""
+append_to_file "$HOME/.localrc" "# Add asdf"
+append_to_file "$HOME/.localrc" "source \$HOME/.asdf/asdf.sh"
+append_to_file "$HOME/.localrc" "source \$HOME/.asdf/completions/asdf.bash"
+
+fancy_echo "... let's install Node.js because you'll end up using it across just about all projects"
+asdf plugin-add nodejs
+bash "$(brew --prefix)/opt/asdf/plugins/nodejs/bin/import-release-team-keyring"
+asdf install nodejs 11.13.0
+asdf global nodejs 11.13.0
+
+# ~/bin is nice to have when you can't use Homebrew.
+if [ ! -d "$HOME/bin/" ]; then
+    mkdir "$HOME/bin"
+fi
+append_to_file "$HOME/.localrc" ""
+append_to_file "$HOME/.localrc" "# Add ~/bin to your path. It's last because this is a fallback."
+append_to_file "$HOME/.localrc" "export PATH=\"\$PATH:\$HOME/bin\""
+fancy_echo "$HOME/bin has been created for your convenience. Drop binaries in there if you need a place to put them."
+
+# shellcheck source=/dev/null
+source "$HOME/.zshrc"
+
+cat <<EOF
+
+And I'm spent! I'll let you do some work for a while.
+
+If you used the prescribed bootstrapping method, then the output of all of these commands was redirected to $HOME/.machine.me.log.
+Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats. I tried to follow any that I could, but I might have missed something that is important for you.
+EOF
+
+# Unhandled caveats:
+#    openssl
