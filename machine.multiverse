@@ -1,0 +1,113 @@
+#!/bin/bash
+
+# Run via:
+# $ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.multiverse)" 2>&1 | tee ~/.machine.multiverse.log
+
+fancy_echo() {
+    local fmt="$1"
+    shift
+
+    # shellcheck disable=SC2059
+    printf "\\n$fmt\\n" "$@"
+}
+
+append_to_file() {
+    local file="$1"
+    local text="$2"
+
+    if [ ! -f "$file" ]; then
+        touch "$file"
+    fi
+
+    if ! grep -qs "^$text$" "$file"; then
+        printf "\\n%s\\n" "$text" >>"$file"
+    fi
+}
+
+add_to_path() {
+    append_to_file "$HOME/.localrc" "export PATH=\"$1:\$PATH\""
+    export PATH="$1:$PATH"
+}
+
+go_home() {
+    cd "$HOME"
+}
+
+homebrew_install_or_update() {
+    if ! command -v brew >/dev/null; then
+        fancy_echo "Installing Homebrew ..."
+        curl -fsSL "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
+
+        append_to_file "$HOME/.localrc" "# Recommended by brew doctor"
+
+        add_to_path "/usr/local/bin"
+    else
+        fancy_echo "Updating Homebrew ..."
+        brew update
+    fi
+}
+
+# shellcheck disable=SC2154
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+
+set -e
+
+cat <<EOF
+Hi, $USER.
+Let's bootstrap your macOS machine for sugarcrm/multiverse development.
+
+EOF
+
+# Start at home.
+go_home
+
+homebrew_install_or_update
+
+fancy_echo "Installing some software you're going to need ..."
+brew bundle --file=- <<EOF
+cask_args appdir: "/Applications"
+
+brew "go"
+brew "dep"
+brew "hugo"
+
+cask "minikube"
+EOF
+
+fancy_echo "Grabbing the multiverse source code ..."
+git clone --recursive -o upstream git@github.com:sugarcrm/multiverse.git
+cd multiverse
+git submodule init
+git submodule update
+fancy_echo "... the source code has been installed to $HOME/multiverse"
+fancy_echo "... note that upstream is named upstream instead of origin"
+fancy_echo "... I dealt with the submodules for you"
+
+# Back to home.
+go_home
+
+append_to_file "$HOME/.localrc" "# multiverse/tools/bin should be in your path"
+add_to_path "\$HOME/multiverse/tools/bin"
+fancy_echo "... the multiverse tools are now in your path"
+
+fancy_echo "Enabling minikube addons ..."
+minikube addons enable ingress
+minikube addons enable heapster
+minikube addons configure registry-creds
+minikube addons enable registry-creds # Enter your credentials for our private docker registry quay.io.
+
+fancy_echo "Making debugging possible ..."
+go get -u github.com/derekparker/delve/cmd/dlv
+fancy_echo "... refer to the guide at https://multiverse.service.sugarcrm.com/development/go/#debugging"
+
+cat <<EOF
+
+Your PATH can be found in $HOME/.localrc. If it's not already, make sure you add the following to $HOME/.bashrc, $HOME/.bash_profile, $HOME/.zshrc, or whatever file you use.
+
+source \$HOME/.localrc
+
+That's all folks! Don't forget to read the multiverse documentation at https://multiverse.service.sugarcrm.com/.
+
+If you used the prescribed bootstrapping method, then the output of all of these commands was redirected to $HOME/.machine.multiverse.log.
+Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats.
+EOF
