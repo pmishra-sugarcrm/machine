@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# TODO: Might not use minikube anymore. Docker for Desktop on Mac might be worth trying.
-
 # Run via:
 # $ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.multiverse)" 2>&1 | tee ~/.machine.multiverse.log
 
