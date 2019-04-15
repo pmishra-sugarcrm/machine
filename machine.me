@@ -225,6 +225,10 @@ mas "slack", id: 803453959
 EOF
 fancy_echo "... now we're feeling it! w00t!"
 
+fancy_echo "Configuration tmux ..."
+# source: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard/blob/master/Usage.md#basic-configuration
+append_to_file "$HOME/.tmux.conf" "set-option -g default-command \"reattach-to-user-namespace -l zsh\""
+
 fancy_echo "Writing to NTFS drives is a must ..."
 # https://www.howtogeek.com/236055/how-to-write-to-ntfs-drives-on-a-mac/
 # TODO
