@@ -1,0 +1,30 @@
+---
+:flavor: ult
+:version: 9.1.0.0
+:watch_dirs:
+- sugarcrm
+:hide_paths:
+:build_dir: /Users/glevine/sugarcrm/www
+:project_dir: /Users/glevine/sugarcrm/Mango
+:base_url: http://localhost:8080/mango
+:notifications: !ruby/hash:Configliere::Param
+  :enabled: false
+  :verbose: false
+:build_options: !ruby/hash:Configliere::Param
+  :clean_cache: true
+  :build_on_start: false
+  :theme_client: base
+  :build_delay: 0.5
+  :build_threshold: 50
+  :include_language_packs: false
+:branch_monitor: !ruby/hash:Configliere::Param
+  :enabled: false
+  :regex: !ruby/regexp /((([0-9])_([0-9])_([0-9]))-([^-]*))/
+  :has_version: true
+  :version_location: 1
+  :folder: !ruby/hash:Configliere::Param
+    :prepend:
+    :append: .dev
+  :name_location: 0
+  :name_to_url: host
+  :full_build: true

@@ -1,0 +1,245 @@
+#!/bin/bash
+
+# Run via:
+# $ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.mango)" 2>&1 | tee ~/.machine.mango.log
+
+fancy_echo() {
+    local fmt="$1"
+    shift
+
+    # shellcheck disable=SC2059
+    printf "\\n$fmt\\n" "$@"
+}
+
+append_to_file() {
+    local file="$1"
+    local text="$2"
+    local skip_new_line="${3:-0}"
+
+    if [ ! -f "$file" ]; then
+        touch "$file"
+
+        # No need to add a new line if the file is brand new.
+        skip_new_line=1
+    fi
+
+    if ! grep -Fqs "^$text$" "$file"; then
+        if [ "$skip_new_line" -eq 1 ]; then
+            printf "%s\\n" "$text" >>"$file"
+        else
+            printf "\\n%s\\n" "$text" >>"$file"
+        fi
+    fi
+}
+
+add_to_path() {
+    local text="$1"
+
+    # Assumes a comment precedes this line.
+    append_to_file "$HOME/.localrc" "export PATH=\"$text:\$PATH\"" 1
+
+    export PATH="$1:$PATH"
+}
+
+# shellcheck disable=SC2154
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+
+set -e
+
+cat <<EOF
+Hi, $USER.
+Let's bootstrap your macOS machine for sugarcrm/Mango development.
+
+EOF
+
+# Start at home.
+cd "$HOME"
+
+# Homebrew is the source of so much.
+if ! command -v brew >/dev/null; then
+    fancy_echo "Installing Homebrew ..."
+    curl -fsSL "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
+
+    append_to_file "$HOME/.localrc" "# Recommended by brew doctor."
+    add_to_path "/usr/local/bin"
+else
+    fancy_echo "Updating Homebrew ..."
+    brew update
+fi
+
+fancy_echo "Installing some software you're going to need ..."
+brew bundle --file=- <<EOF
+cask_args appdir: "/Applications"
+
+brew "composer"
+brew "php-code-sniffer"
+brew "phpmd"
+brew "vagrant-completion"
+
+cask "sequel-pro"
+cask "vagrant"
+cask "vagrant-manager"
+cask "virtualbox"
+
+tap "sugarcrm/devops", "git@github.com:sugarcrm/homebrew-devops.git"
+brew "build-monitor"
+EOF
+
+if [ ! -d "$HOME/sugarcrm/" ]; then
+    mkdir "$HOME/sugarcrm"
+fi
+
+if [ ! -d "$HOME/sugarcrm/Mango" ]; then
+    fancy_echo "Grabbing the Mango source code ..."
+
+    (
+        cd "$HOME/sugarcrm"
+        git clone --recursive -o upstream git@github.com:sugarcrm/Mango.git
+    )
+    fancy_echo "... the source code has been installed to $HOME/sugacrm/Mango"
+
+    (
+        cd "$HOME/sugarcrm/Mango"
+        git remote add origin "git@github.com:$USER/Mango.git"
+    )
+    fancy_echo "... note that upstream is named upstream instead of origin"
+
+    (
+        cd "$HOME/sugarcrm/Mango"
+        git submodule init
+        git submodule update
+    )
+
+    (
+        cd "$HOME/sugarcrm/Mango/sugarcrm"
+        composer install
+    )
+
+    (
+        cd "$HOME/sugarcrm/Mango/sugarcrm/sidecar"
+        git remote add origin "git@github.com:$USER/sidecar.git"
+    )
+
+    fancy_echo "... I dealt with the submodules and package dependencies for you"
+fi
+
+fancy_echo "Installing Git hooks for Mango ..."
+
+if [ -f "$HOME/sugarcrm/Mango/.git/hooks/post-merge" ]; then
+    curl -fsSL https://raw.github.com/glevine/machine/master/mango/post-merge -o "$HOME/sugarcrm/Mango/.git/hooks/post-merge"
+    chmod +x "$HOME/sugarcrm/Mango/.git/hooks/post-merge"
+fi
+fancy_echo "... $HOME/sugarcrm/Mango/.git/hooks/post-merge"
+
+if [ -f "$HOME/sugarcrm/Mango/.git/hooks/post-rebase" ]; then
+    curl -fsSL https://raw.github.com/glevine/machine/master/mango/post-rebase -o "$HOME/sugarcrm/Mango/.git/hooks/post-rebase"
+    chmod +x "$HOME/sugarcrm/Mango/.git/hooks/post-rebase"
+fi
+fancy_echo "... $HOME/sugarcrm/Mango/.git/hooks/post-rebase"
+
+if [ -f "$HOME/sugarcrm/Mango/.git/hooks/post-checkout" ]; then
+    curl -fsSL https://raw.github.com/glevine/machine/master/mango/post-checkout -o "$HOME/sugarcrm/Mango/.git/hooks/post-checkout"
+    chmod +x "$HOME/sugarcrm/Mango/.git/hooks/post-checkout"
+fi
+fancy_echo "... $HOME/sugarcrm/Mango/.git/hooks/post-checkout"
+
+if [ -f "$HOME/sugarcrm/Mango/.git/hooks/pre-commit" ]; then
+    curl -fsSL https://raw.github.com/glevine/machine/master/mango/pre-commit -o "$HOME/sugarcrm/Mango/.git/hooks/pre-commit"
+    chmod +x "$HOME/sugarcrm/Mango/.git/hooks/pre-commit"
+fi
+fancy_echo "... $HOME/sugarcrm/Mango/.git/hooks/pre-commit"
+
+fancy_echo "Sidecar requires a Node.js >= 8.9.2. Seedbed requires 8.x. Sidecar docs require 6.x. Set Node.js accordingly ..."
+
+brew bundle --file=- <<EOF
+brew "asdf"
+brew "autoconf"
+brew "automake"
+brew "coreutils"
+brew "gpg"
+brew "libtool"
+brew "libxslt"
+brew "libyaml"
+brew "openssl"
+brew "readline"
+brew "unixodbc"
+EOF
+
+append_to_file "$HOME/.localrc" "# Add asdf."
+append_to_file "$HOME/.localrc" "source \$HOME/.asdf/asdf.sh" 1
+append_to_file "$HOME/.localrc" "source \$HOME/.asdf/completions/asdf.bash" 1
+
+asdf plugin-add nodejs
+bash "$(brew --prefix)/opt/asdf/plugins/nodejs/bin/import-release-team-keyring"
+asdf install nodejs 8.9.4
+asdf global nodejs 8.9.4
+
+# source: https://github.com/jwhitcraft/rome
+fancy_echo "Use rome to build the application ..."
+
+if ! command -v rome >/dev/null; then
+    curl -fsSL "http://h2ik.co/rome/rome-$(uname -s)-$(uname -m)" -o /usr/local/bin/rome
+    chmod +x /usr/local/bin/rome
+
+    if [ ! -d "$HOME/sugarcrm/www/" ]; then
+        mkdir "$HOME/sugarcrm/www"
+    fi
+
+    rome self-update
+    fancy_echo "... rome will self update"
+fi
+
+"... ex: \`rome build --clean -d $HOME/sugarcrm/www -f ult -v 9.1.0.0 --file-workers=40 $HOME/sugarcrm/Mango/sugarcrm\`"
+
+fancy_echo "Use build-monitor to watch for source code changes and compile files ..."
+if [ -f "$HOME/.build_monitor.yaml" ]; then
+    curl -fsSL https://raw.github.com/glevine/machine/master/mango/.build_monitor.yaml -o "$HOME/.build_monitor.yaml"
+fi
+fancy_echo "... ex: \`cd $HOME && build-monitor -w ~/Mango\`"
+
+if [ ! -d "$HOME/sugarcrm/Mango" ]; then
+    fancy_echo "Downloading the dev stacks ..."
+
+    (
+        cd "$HOME/sugarcrm"
+        git clone --recursive -o upstream git@github.com:sugarcrm/stacks.git
+    )
+    fancy_echo "... the stacks have been installed to $HOME/sugarcrm/stacks"
+
+    (
+        cd "$HOME/sugarcrm/stacks"
+        git remote add origin "git@github.com:$USER/stacks.git"
+    )
+    fancy_echo "... note that upstream is named upstream instead of origin"
+
+    fancy_echo "Configuring the dev stacks ..."
+    sudo bash "$HOME/sugarcrm/stacks/prereq.sh"
+    vagrant plugin install vagrant-cachier
+    vagrant plugin install vagrant-vbguest
+    chown -R "$USER:staff" "$HOME/.vagrant.d"
+fi
+
+fancy_echo "After building the application, you can reach it at http://localhost:8080. Use localhost:9900 for remote debugging."
+fancy_echo "Connect to the MySQL server using \`mysql -u sugar -psugar -h 127.0.0.1 -P 8306\`."
+fancy_echo "Install the elasticsearch head plugin at https://chrome.google.com/webstore/detail/elasticsearch-head/ffmkiejjmecolpfloofpjologoblkegm. Use localhost:8954."
+
+fancy_echo "Use srome to build the application in a dev stack ..."
+
+if ! command -v srome >/dev/null; then
+    curl -fsSL https://raw.github.com/glevine/machine/master/mango/srome -o /usr/local/bin/srome
+    chmod +x /usr/local/bin/srome
+fi
+
+"... ex: \`srome -f ult -v 9.1.0.0\`"
+
+cat <<EOF
+
+Your PATH can be found in $HOME/.localrc. If it's not already, make sure you add the following to $HOME/.bashrc, $HOME/.bash_profile, $HOME/.zshrc, or whatever file you use.
+
+source \$HOME/.localrc
+
+That's a wrap!
+
+If you used the prescribed bootstrapping method, then the output of all of these commands was redirected to $HOME/.machine.mango.log.
+Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats.
+EOF

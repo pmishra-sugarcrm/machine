@@ -5,3 +5,6 @@ $ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.me
 
 #### machine.multiverse
 $ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.multiverse)" 2>&1 | tee ~/.machine.multiverse.log
+
+#### machine.mango
+$ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.mango)" 2>&1 | tee ~/.machine.mango.log

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: Might not use minikube anymore. Docker for Desktop on Mac might be worth trying.
+
 # Run via:
 # $ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.multiverse)" 2>&1 | tee ~/.machine.multiverse.log
 
@@ -41,10 +43,6 @@ add_to_path() {
     export PATH="$1:$PATH"
 }
 
-go_home() {
-    cd "$HOME"
-}
-
 # shellcheck disable=SC2154
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
@@ -57,7 +55,7 @@ Let's bootstrap your macOS machine for sugarcrm/multiverse development.
 EOF
 
 # Start at home.
-go_home
+cd "$HOME"
 
 # Homebrew is the source of so much.
 if ! command -v brew >/dev/null; then
@@ -82,21 +80,36 @@ brew "hugo"
 cask "minikube"
 EOF
 
-fancy_echo "Grabbing the multiverse source code ..."
-git clone --recursive -o upstream git@github.com:sugarcrm/multiverse.git
-cd multiverse
-git submodule init
-git submodule update
-fancy_echo "... the source code has been installed to $HOME/multiverse"
-fancy_echo "... note that upstream is named upstream instead of origin"
-fancy_echo "... I dealt with the submodules for you"
+if [ ! -d "$HOME/sugarcrm/" ]; then
+    mkdir "$HOME/sugarcrm"
+fi
 
-# Back to home.
-go_home
+if [ ! -d "$HOME/sugarcrm/multiverse" ]; then
+    fancy_echo "Grabbing the multiverse source code ..."
 
+    (
+        cd "$HOME/sugarcrm"
+        git clone --recursive -o upstream git@github.com:sugarcrm/multiverse.git
+    )
+    fancy_echo "... the source code has been installed to $HOME/sugarcrm/multiverse"
+
+    (
+        cd "$HOME/sugarcrm/multiverse"
+        git remote add origin "git@github.com:$USER/Mango.git"
+    )
+    fancy_echo "... note that upstream is named upstream instead of origin"
+
+    (
+        cd "$HOME/sugarcrm/multiverse"
+        git submodule init
+        git submodule update
+    )
+    fancy_echo "... I dealt with the submodules for you"
+fi
+
+fancy_echo "Adding the multiverse tools to your your path ..."
 append_to_file "$HOME/.localrc" "# multiverse/tools/bin should be in your path."
-add_to_path "\$HOME/multiverse/tools/bin"
-fancy_echo "... the multiverse tools are now in your path"
+add_to_path "\$HOME/sugarcrm/multiverse/tools/bin"
 
 fancy_echo "Enabling minikube addons ..."
 minikube addons enable ingress

@@ -41,10 +41,6 @@ add_to_path() {
     export PATH="$1:$PATH"
 }
 
-go_home() {
-    cd "$HOME"
-}
-
 wait_for_user() {
     read -n 1 -s -r -p "Press any key to continue..."
 }
@@ -87,12 +83,12 @@ if echo "$answer" | grep -iq "^n"; then
 fi
 
 # Start at home.
-go_home
+cd "$HOME"
 
 # source: https://brettterpstra.com/2018/09/26/shell-tricks-toggling-dark-mode-from-terminal/
 fancy_echo "Going dark ..."
 osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to true'
-fancy_echo "... Ahhhh, much better."
+fancy_echo "... ahhhh, much better"
 
 # Github SSH key.
 if [ -f "$HOME/.ssh/id_rsa" ]; then
@@ -277,7 +273,6 @@ fancy_echo "... Git configurations live at $HOME/.gitconfig"
 
 fancy_echo "Let's get logging into $(gist) out of the way ..."
 gist --login
-fancy_echo "... now we can move on from Git"
 
 fancy_echo "Installing asdf for managing language & runtime versions ..."
 
@@ -299,19 +294,11 @@ append_to_file "$HOME/.localrc" "# Add asdf."
 append_to_file "$HOME/.localrc" "source \$HOME/.asdf/asdf.sh" 1
 append_to_file "$HOME/.localrc" "source \$HOME/.asdf/completions/asdf.bash" 1
 
-fancy_echo "... let's install Node.js because you'll end up using it across just about all projects"
+fancy_echo "Let's install Node.js because you'll end up using it across just about all projects ..."
 asdf plugin-add nodejs
 bash "$(brew --prefix)/opt/asdf/plugins/nodejs/bin/import-release-team-keyring"
 asdf install nodejs 11.13.0
 asdf global nodejs 11.13.0
-
-# ~/bin is nice to have when you can't use Homebrew.
-if [ ! -d "$HOME/bin/" ]; then
-    mkdir "$HOME/bin"
-fi
-append_to_file "$HOME/.localrc" "# Add ~/bin to your path. It's last because this is a fallback."
-append_to_file "$HOME/.localrc" "export PATH=\"\$PATH:\$HOME/bin\"" 1
-fancy_echo "$HOME/bin has been created for your convenience. Drop binaries in there if you need a place to put them."
 
 # shellcheck source=/dev/null
 source "$HOME/.zshrc"

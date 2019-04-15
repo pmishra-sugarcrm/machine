@@ -1,0 +1,44 @@
+#!/bin/bash
+
+flavor="ult"
+version="9.1.0.0"
+
+while getopts ":fv" opt; do
+    case ${opt} in
+    f)
+        flavor=$OPTARG
+        ;;
+    t)
+        version=$OPTARG
+        ;;
+    \?) ;&
+    :)
+        echo "Usage: srome [-f] [-v]"
+        exit 0
+        ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+if [[ -z "$flavor" ]]; then
+    echo "Usage: srome [-f] [-v]"
+    exit 0
+fi
+
+if [[ -z "$version" ]]; then
+    echo "Usage: srome [-f] [-v]"
+    exit 0
+fi
+
+rome build --clean -d "$HOME/sugarcrm/www" -f "$flavor" -v "$version" --file-workers=40 "$HOME/sugarcrm/Mango/sugarcrm"
+
+vagrant up
+
+echo "-
+  source: $HOME/sugarcrm/www
+  target: /var/www/html/
+" >share.yaml
+
+vagrant reload
+
+open http://localhost:8080
