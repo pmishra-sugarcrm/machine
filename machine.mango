@@ -149,6 +149,11 @@ if [ -f "$HOME/sugarcrm/Mango/.git/hooks/pre-commit" ]; then
 fi
 fancy_echo "... $HOME/sugarcrm/Mango/.git/hooks/pre-commit"
 
+# source: https://github.com/alias-mac/dotfiles/blob/master/bin/git-psr2
+fancy_echo "Use \`git psr2\` to check staged code for PSR-2 compliance ..."
+curl -fsSL https://raw.githubusercontent.com/alias-mac/dotfiles/master/bin/git-psr2 -o /usr/local/bin/git-psr2
+chmod +x /usr/local/bin/git-psr2
+
 fancy_echo "Sidecar requires a Node.js >= 8.9.2. Seedbed requires 8.x. Sidecar docs require 6.x. Set Node.js accordingly ..."
 
 brew bundle --file=- <<EOF
