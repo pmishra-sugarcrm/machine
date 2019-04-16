@@ -180,6 +180,7 @@ brew "grc"
 brew "grep"
 brew "handbrake"
 brew "jq"
+brew "ntfs-3g"
 brew "openssl"
 brew "osxutils"
 brew "parallel"
@@ -274,7 +275,7 @@ append_to_file "$HOME/.gitignore" ".DS_Store" 1
 
 fancy_echo "... Git configurations live at $HOME/.gitconfig"
 
-fancy_echo "Let's get logging into $(gist) out of the way ..."
+fancy_echo "Let's get logging into \`gist\` out of the way ..."
 gist --login
 
 fancy_echo "Installing asdf for managing language & runtime versions ..."
