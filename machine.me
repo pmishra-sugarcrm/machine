@@ -239,23 +239,23 @@ fancy_echo "Now you can use \`code\` in your terminal to launch Visual Studio Co
 
 fancy_echo "Let me configure Git for you..."
 
-read -r -p "What is your name?" username
+read -r -p "What is your name? " username
 git config --global user.name "$username"
-read -r -p "What is your email address?" email
+read -r -p "What is your email address? " email
 git config --global user.email "$email"
-git config --global.credential.helper osxkeychain
-git config --global.alias.amend "commit --amend"
-git config --global.alias.b branch
-git config --global.alias.co checkout
-git config --global.alias.cob "checkout -b"
-git config --global.alias.cp "cherry-pick"
-git config --global.alias.r "remote -v"
-git config --global.alias.ra "remote add"
-git config --global.alias.rb "rebase -i"
-git config --global.alias.smi "submodule init"
-git config --global.alias.smu "submodule update"
-git config --global.alias.st status
-git config --global.alias.unstage "reset --soft HEAD^"
+git config --global credential.helper osxkeychain
+git config --global alias.amend "commit --amend"
+git config --global alias.b branch
+git config --global alias.co checkout
+git config --global alias.cob "checkout -b"
+git config --global alias.cp "cherry-pick"
+git config --global alias.r "remote -v"
+git config --global alias.ra "remote add"
+git config --global alias.rb "rebase -i"
+git config --global alias.smi "submodule init"
+git config --global alias.smu "submodule update"
+git config --global alias.st status
+git config --global alias.unstage "reset --soft HEAD^"
 git config --global core.autocrlf input
 git config --global core.editor "code --wait"
 git config --global core.whitespace -blank-at-eof,tab-in-indent
