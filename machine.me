@@ -125,7 +125,7 @@ if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ]; then
     fancy_echo "Can't live without zsh ..."
 
     brew install zsh
-    chsh -s /bin/zsh
+    # oh my zsh will change the default shell
 
     fancy_echo "... and better yet, oh my zsh!"
     curl -fsSL "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" | sh
@@ -203,7 +203,6 @@ cask "gimp"
 cask "google-chrome"
 cask "gpg-suite"
 cask "grammarly"
-cask "logitech-myharmony"
 cask "netspot"
 cask "ngrok"
 cask "onedrive"
