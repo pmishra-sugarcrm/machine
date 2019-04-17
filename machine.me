@@ -301,9 +301,11 @@ Your Git configurations live at $HOME/.gitconfig.
 
 asdf is used for managing language and runtime versions. Learn how to manage these at https://asdf-vm.com/#/core-commands.
 
-Writing to NTFS drives is a must. The instructions can be found at https://github.com/osxfuse/osxfuse/wiki/NTFS-3G. The software has already been installed, but some manual steps are required to auto-mount NTFS volumes in read-write mode.
+Writing to NTFS drives is a must. The instructions can be found at https://github.com/osxfuse/osxfuse/wiki/NTFS-3G.
+The software has already been installed, but some manual steps are required to auto-mount NTFS volumes in read-write mode.
 
-To replace /sbin/mount_ntfs with the version provided by NTFS-3G you will need to reboot your Mac in recovery mode before proceeding. See https://support.apple.com/en-us/HT201314 for details on how to start the recovery system. Once in recovery mode open a new Terminal window from the Utilities menu and enter the following commands:
+To replace /sbin/mount_ntfs with the version provided by NTFS-3G you will need to reboot your Mac in recovery mode before proceeding. See https://support.apple.com/en-us/HT201314 for details on how to start the recovery system.
+Once in recovery mode open a new Terminal window from the Utilities menu and enter the following commands:
 
 \$ sudo mv "/Volumes/Macintosh HD/sbin/mount_ntfs" "/Volumes/Macintosh HD/sbin/mount_ntfs.orig"
 \$ sudo ln -s /usr/local/sbin/mount_ntfs "/Volumes/Macintosh HD/sbin/mount_ntfs"
