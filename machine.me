@@ -1,15 +1,9 @@
 #!/bin/bash
 
+# This script has been modeled after https://github.com/thoughtbot/laptop.
+
 # Run via:
-# $ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.me)" 2>&1 | tee ~/.machine.me.log
-
-fancy_echo() {
-    local fmt="$1"
-    shift
-
-    # shellcheck disable=SC2059
-    printf "\\n$fmt\\n" "$@"
-}
+# $ bash -c "$(curl -fsSL -H 'Cache-Control: non-cache' https://raw.github.com/glevine/machine/master/machine.me)" 2>&1 | tee ~/.machine.me.log
 
 append_to_file() {
     local file="$1"
@@ -46,7 +40,7 @@ wait_for_user() {
 }
 
 github_ssh_key() {
-    fancy_echo "Following https://help.github.com/en/articles/connecting-to-github-with-ssh to connect to Github with SSH ..."
+    echo "Following https://help.github.com/en/articles/connecting-to-github-with-ssh to connect to Github with SSH ..."
 
     ssh-keygen -t rsa -b 4096
     eval "$(ssh-agent -s)"
@@ -72,27 +66,26 @@ Go ahead. I'll wait for you.
 EOF
 wait_for_user
 
-fancy_echo "It is recommended that you update all of your software in the App Store and upgrade macOS if available. You can re-run this script when you are ready. Do you want to continue? (y/n)?"
+echo "It is recommended that you update all of your software in the App Store and upgrade macOS if available. You can re-run this script when you are ready. Do you want to continue? (y/n)?"
 old_stty_cfg=$(stty -g)
 stty raw -echo
 answer=$(while ! head -c 1 | grep -i '[ny]'; do true; done)
 stty "$old_stty_cfg"
 if echo "$answer" | grep -iq "^n"; then
-    fancy_echo "Come back when you're done."
+    echo "Come back when you're done."
     exit 0
 fi
 
 # Start at home.
 cd "$HOME"
 
+# Going dark.
 # source: https://brettterpstra.com/2018/09/26/shell-tricks-toggling-dark-mode-from-terminal/
-fancy_echo "Going dark ..."
 osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to true'
-fancy_echo "... ahhhh, much better"
 
 # Github SSH key.
 if [ -f "$HOME/.ssh/id_rsa" ]; then
-    fancy_echo "It looks like you already have an SSH key. Do you need to generate a new one? (y/n)?"
+    echo "It looks like you already have an SSH key. Do you need to generate a new one? (y/n)?"
     old_stty_cfg=$(stty -g)
     stty raw -echo
     answer=$(while ! head -c 1 | grep -i '[ny]'; do true; done)
@@ -105,32 +98,28 @@ else
 fi
 
 pbcopy <"$HOME/.ssh/id_rsa.pub"
-fancy_echo "... Your SSH key was copied to your clipboard. If needed, go to https://github.com/settings/ssh/new to add your SSH key to Github. I'll wait for you."
+echo "Your SSH key was copied to your clipboard. If needed, go to https://github.com/settings/ssh/new to add your SSH key to Github. I'll wait for you."
 wait_for_user
 
 # Homebrew is the source of so much.
 if ! command -v brew >/dev/null; then
-    fancy_echo "Installing Homebrew ..."
-    curl -fsSL "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
-
+    curl -fsSL -H "Cache-Control: non-cache" "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
     append_to_file "$HOME/.localrc" "# Recommended by brew doctor."
     add_to_path "/usr/local/bin"
 else
-    fancy_echo "Updating Homebrew ..."
     brew update
 fi
 
-# Switch to zsh.
+# Can't live without zsh.
 if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ]; then
-    fancy_echo "Can't live without zsh ..."
-
+    # Get the latest zsh.
     brew install zsh
-    # oh my zsh will change the default shell
 
-    fancy_echo "... and better yet, oh my zsh!"
-    curl -fsSL "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" | sh
+    # Make zsh the default shell.
+    sudo dscl . -create "/Users/$USER" UserShell /usr/local/bin/zsh
 
-    fancy_echo "... with some plugins"
+    # Better yet, oh my zsh!
+    curl -fsSL -H "Cache-Control: non-cache" "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" | sh
 
     # zsh-autosuggestions
     git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
@@ -146,31 +135,26 @@ if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ]; then
     append_to_file "$HOME/.localrc" "# Others worth considering: git-prompt, jump (Does it overlap with autojump?), kubectrl, minikube, per-directory-history (Does it overlap with dirhistory or history?), pj (Does it overlap with autojump?), thefuck (Conflicts with sudo.), vagrant-prompt, z (Does it overlap with autojump?), zsh-navigation-tools" 1
     append_to_file "$HOME/.localrc" "plugins=(asdf autojump colored-man-pages command-not-found common-aliases compleat copybuffer copydir copyfile cp dirhistory dirpersist docker docker-compose dotenv extract git golang heroku history iwhois last-working-dir lol man npm osx perms sublime sudo themes timer tmux urltools vagrant vault web-search yarn wd zsh_reload zsh-history-substring-search zsh-autosuggestions zsh-completions zsh-syntax-highlighting)" 1
 
-    fancy_echo "... and better command history searching with arrow keys"
-    append_to_file "$HOME/.localrc" "# Search history with arrow keys."
+    append_to_file "$HOME/.localrc" "# Search history with arrow keys. Learn how to search your command history at https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys."
     append_to_file "$HOME/.localrc" "autoload -U up-line-or-beginning-search" 1
     append_to_file "$HOME/.localrc" "autoload -U down-line-or-beginning-search" 1
     append_to_file "$HOME/.localrc" "zle -N up-line-or-beginning-search" 1
     append_to_file "$HOME/.localrc" "zle -N down-line-or-beginning-search" 1
     append_to_file "$HOME/.localrc" "bindkey \"^[[A\" up-line-or-beginning-search # Up" 1
     append_to_file "$HOME/.localrc" "bindkey \"^[[B\" down-line-or-beginning-search # Down" 1
-    fancy_echo "... learn how to search your command history at https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys"
 
     # Add ~/.localrc to ~/.zshrc.
     append_to_file "$HOME/.zshrc" "# $HOME/.localrc is where all of the customizations are."
     append_to_file "$HOME/.zshrc" "source \$HOME/.localrc" 1
 fi
 
-fancy_echo "Let's have a round of the usual brews ..."
+# Let's have a round of the usual brews.
 brew bundle --file=- <<EOF
-cask_args appdir: "/Applications"
-
 tap "homebrew/command-not-found"
 
 brew "ack"
 brew "base64"
 brew "cheat"
-brew "closure-linter"
 brew "coreutils"
 brew "dateutils"
 brew "ffind"
@@ -180,7 +164,6 @@ brew "grc"
 brew "grep"
 brew "handbrake"
 brew "jq"
-brew "ntfs-3g"
 brew "openssl"
 brew "osxutils"
 brew "parallel"
@@ -209,7 +192,6 @@ cask "ngrok"
 cask "onedrive"
 cask "plex-media-player"
 cask "postman"
-cask "sequel-pro"
 cask "sourcetree"
 cask "sublime-text"
 cask "vagrant"
@@ -218,31 +200,28 @@ cask "virtualbox"
 cask "visual-studio-code"
 cask "vlc"
 
-mas "1password", id: 1333542190
 mas "amphetamine", id: 937984704
 mas "evernote", id: 406056744
 mas "slack", id: 803453959
-EOF
-fancy_echo "... now we're feeling it! w00t!"
 
-fancy_echo "Configuration tmux ..."
+# osxfuse must be installed before ntfs-3g.
+cask "osxfuse"
+brew "ntfs-3g"
+EOF
+
+# Configuration tmux.
 # source: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard/blob/master/Usage.md#basic-configuration
 append_to_file "$HOME/.tmux.conf" "set-option -g default-command \"reattach-to-user-namespace -l zsh\""
 
-fancy_echo "Writing to NTFS drives is a must ..."
-# https://www.howtogeek.com/236055/how-to-write-to-ntfs-drives-on-a-mac/
-# TODO
-fancy_echo "... achievement unlocked!"
+# Configure Git.
+echo "Let's configure Git ..."
 
-append_to_file "$HOME/.localrc" "# Add Visual Studio Code (code)."
+append_to_file "$HOME/.localrc" "# Use \`code\` to launch Visual Studio Code. Allows VS Code to be used as the Git editor."
 add_to_path "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-fancy_echo "Now you can use \`code\` in your terminal to launch Visual Studio Code"
 
-fancy_echo "Let me configure Git for you..."
-
-read -r -p "What is your name? " username
+read -r -p "What is your Git author name? " username
 git config --global user.name "$username"
-read -r -p "What is your email address? " email
+read -r -p "What is your Git email address? " email
 git config --global user.email "$email"
 git config --global credential.helper osxkeychain
 git config --global alias.amend "commit --amend"
@@ -273,13 +252,10 @@ append_to_file "$HOME/.gitignore" "*~"
 append_to_file "$HOME/.gitignore" ".*.swp" 1
 append_to_file "$HOME/.gitignore" ".DS_Store" 1
 
-fancy_echo "... Git configurations live at $HOME/.gitconfig"
-
-fancy_echo "Let's get logging into \`gist\` out of the way ..."
+echo "Sign into gist ..."
 gist --login
 
-fancy_echo "Installing asdf for managing language & runtime versions ..."
-
+# Use asdf for managing language & runtime versions.
 brew bundle --file=- <<EOF
 brew "asdf"
 brew "autoconf"
@@ -298,18 +274,37 @@ append_to_file "$HOME/.localrc" "# Add asdf."
 append_to_file "$HOME/.localrc" "source \$HOME/.asdf/asdf.sh" 1
 append_to_file "$HOME/.localrc" "source \$HOME/.asdf/completions/asdf.bash" 1
 
-fancy_echo "Let's install Node.js because you'll end up using it across just about all projects ..."
-asdf plugin-add nodejs
-bash "$(brew --prefix)/opt/asdf/plugins/nodejs/bin/import-release-team-keyring"
-asdf install nodejs 11.13.0
-asdf global nodejs 11.13.0
+# Install Node.js.
+if ! asdf plugin-list | grep -Fq "nodejs"; then
+    asdf plugin-add nodejs
+    bash "$(brew --prefix)/opt/asdf/plugins/nodejs/bin/import-release-team-keyring"
+
+    # Don't change the Node.js version unless installing in case the version needs to be pinned, like for Mango.
+    asdf install nodejs 11.13.0
+    asdf global nodejs 11.13.0
+else
+    asdf plugin-update nodejs
+fi
 
 # shellcheck source=/dev/null
 source "$HOME/.zshrc"
 
 cat <<EOF
 
-And I'm spent! I'll let you do some work for a while.
+And I'm spent! Let me give you a summary of some important things you should know.
+
+All shell customizations can be found in $HOME/.localrc. $HOME/.localrc is sourced in $HOME/.zshrc.
+
+Your Git configurations live at $HOME/.gitconfig.
+
+asdf is used for managing language and runtime versions. Learn how to manage these at https://asdf-vm.com/#/core-commands.
+
+Writing to NTFS drives is a must. The instructions can be found at https://github.com/osxfuse/osxfuse/wiki/NTFS-3G. The software has already been installed, but some manual steps are required to auto-mount NTFS volumes in read-write mode.
+
+To replace /sbin/mount_ntfs with the version provided by NTFS-3G you will need to reboot your Mac in recovery mode before proceeding. See https://support.apple.com/en-us/HT201314 for details on how to start the recovery system. Once in recovery mode open a new Terminal window from the Utilities menu and enter the following commands:
+
+\$ sudo mv "/Volumes/Macintosh HD/sbin/mount_ntfs" "/Volumes/Macintosh HD/sbin/mount_ntfs.orig"
+\$ sudo ln -s /usr/local/sbin/mount_ntfs "/Volumes/Macintosh HD/sbin/mount_ntfs"
 
 If you used the prescribed bootstrapping method, then the output of all of these commands was redirected to $HOME/.machine.me.log.
 Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats. I tried to follow any that I could, but I might have missed something that is important for you.

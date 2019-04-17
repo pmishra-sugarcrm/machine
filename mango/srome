@@ -30,7 +30,7 @@ if [[ -z "$version" ]]; then
     exit 0
 fi
 
-rome build --clean -d "$HOME/sugarcrm/www" -f "$flavor" -v "$version" --file-workers=40 "$HOME/sugarcrm/Mango/sugarcrm"
+rome build --clean -d "$HOME/sugarcrm/www" -f "$flavor" -v "$version" "$HOME/sugarcrm/Mango/sugarcrm"
 
 vagrant up
 

@@ -1,15 +1,9 @@
 #!/bin/bash
 
+# This script has been modeled after https://github.com/thoughtbot/laptop.
+
 # Run via:
-# $ bash -c "$(curl -fsSL https://raw.github.com/glevine/machine/master/machine.multiverse)" 2>&1 | tee ~/.machine.multiverse.log
-
-fancy_echo() {
-    local fmt="$1"
-    shift
-
-    # shellcheck disable=SC2059
-    printf "\\n$fmt\\n" "$@"
-}
+# $ bash -c "$(curl -fsSL -H 'Cache-Control: non-cache' https://raw.github.com/glevine/machine/master/machine.multiverse)" 2>&1 | tee ~/.machine.multiverse.log
 
 append_to_file() {
     local file="$1"
@@ -57,75 +51,111 @@ cd "$HOME"
 
 # Homebrew is the source of so much.
 if ! command -v brew >/dev/null; then
-    fancy_echo "Installing Homebrew ..."
-    curl -fsSL "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
-
+    curl -fsSL -H "Cache-Control: non-cache" "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
     append_to_file "$HOME/.localrc" "# Recommended by brew doctor."
     add_to_path "/usr/local/bin"
 else
-    fancy_echo "Updating Homebrew ..."
     brew update
 fi
 
-fancy_echo "Installing some software you're going to need ..."
 brew bundle --file=- <<EOF
-cask_args appdir: "/Applications"
-
+brew "awscli"
+brew "git"
 brew "go"
 brew "dep"
 brew "hugo"
+brew "yarn"
 
+cask "docker"
 cask "minikube"
+cask "virtualbox"
 EOF
 
+# Grab the multiverse source code.
 if [ ! -d "$HOME/sugarcrm/" ]; then
     mkdir "$HOME/sugarcrm"
 fi
 
 if [ ! -d "$HOME/sugarcrm/multiverse" ]; then
-    fancy_echo "Grabbing the multiverse source code ..."
-
     (
         cd "$HOME/sugarcrm"
         git clone --recursive -o upstream git@github.com:sugarcrm/multiverse.git
-    )
-    fancy_echo "... the source code has been installed to $HOME/sugarcrm/multiverse"
-
-    (
-        cd "$HOME/sugarcrm/multiverse"
-        git remote add origin "git@github.com:$USER/Mango.git"
-    )
-    fancy_echo "... note that upstream is named upstream instead of origin"
-
-    (
-        cd "$HOME/sugarcrm/multiverse"
+        cd multiverse
+        git remote add origin "git@github.com:$USER/multiverse.git"
         git submodule init
         git submodule update
     )
-    fancy_echo "... I dealt with the submodules for you"
 fi
 
-fancy_echo "Adding the multiverse tools to your your path ..."
+# Add the multiverse tools to your path.
 append_to_file "$HOME/.localrc" "# multiverse/tools/bin should be in your path."
 add_to_path "\$HOME/sugarcrm/multiverse/tools/bin"
 
-fancy_echo "Enabling minikube addons ..."
+# Enable minikube addons.
 minikube addons enable ingress
 minikube addons enable heapster
 minikube addons configure registry-creds
 minikube addons enable registry-creds # Enter your credentials for our private docker registry quay.io.
 
-fancy_echo "Making debugging possible ..."
+# Make debugging possible.
 go get -u github.com/derekparker/delve/cmd/dlv
-fancy_echo "... refer to the guide at https://multiverse.service.sugarcrm.com/development/go/#debugging"
+
+# Use asdf for managing language & runtime versions.
+brew bundle --file=- <<EOF
+brew "asdf"
+brew "autoconf"
+brew "automake"
+brew "coreutils"
+brew "gpg"
+brew "libtool"
+brew "libxslt"
+brew "libyaml"
+brew "openssl"
+brew "readline"
+brew "unixodbc"
+EOF
+
+append_to_file "$HOME/.localrc" "# Add asdf."
+append_to_file "$HOME/.localrc" "source \$HOME/.asdf/asdf.sh" 1
+append_to_file "$HOME/.localrc" "source \$HOME/.asdf/completions/asdf.bash" 1
+
+# Install Node.js.
+if ! asdf plugin-list | grep -Fq "nodejs"; then
+    asdf plugin-add nodejs
+    bash "$(brew --prefix)/opt/asdf/plugins/nodejs/bin/import-release-team-keyring"
+
+    # Don't change the Node.js version unless installing in case the version needs to be pinned, like for Mango.
+    asdf install nodejs 11.13.0
+    asdf global nodejs 11.13.0
+else
+    asdf plugin-update nodejs
+fi
 
 cat <<EOF
 
-Your PATH can be found in $HOME/.localrc. If it's not already, make sure you add the following to $HOME/.bashrc, $HOME/.bash_profile, $HOME/.zshrc, or whatever file you use.
+That's all folks! Let me give you a summary of some important things you should know.
+
+The source code has been installed to $HOME/sugarcrm/multiverse. Note that upstream is named upstream and your fork is named origin.
+
+The multiverse CLI tools have been added to your PATH.
+Your PATH and other shell customizations can be found in $HOME/.localrc. If it's not already, make sure you add the following to $HOME/.bashrc, $HOME/.bash_profile, $HOME/.zshrc, or whatever file you use.
 
 source \$HOME/.localrc
 
-That's all folks! Don't forget to read the multiverse documentation at https://multiverse.service.sugarcrm.com/.
+Some minikube addons have been enabled. Use \`minikube addons list\` to see addons statuses.
+
+asdf is used for managing language and runtime versions. Learn how to manage these at https://asdf-vm.com/#/core-commands.
+
+Follow the instructions at https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html to configure AWS CLI.
+
+\$ aws configure --profile you@sugarcrm.com
+AWS Access Key ID [None]: ?
+AWS Secret Access Key [None]: ?
+Default region name [None]: us-east-1
+Default output format [None]: json
+
+Don't forget to read the multiverse documentation at https://multiverse.service.sugarcrm.com/.
+And refer to the guide at https://multiverse.service.sugarcrm.com/development/go/#debugging specifically for debugging.
 
 If you used the prescribed bootstrapping method, then the output of all of these commands was redirected to $HOME/.machine.multiverse.log.
 Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats.

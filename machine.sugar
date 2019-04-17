@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# This script has been modeled after https://github.com/thoughtbot/laptop.
+
+# Run via:
+# $ bash -c "$(curl -fsSL -H 'Cache-Control: non-cache' https://raw.github.com/glevine/machine/master/machine.sugar)" 2>&1 | tee ~/.machine.sugar.log
+
+append_to_file() {
+    local file="$1"
+    local text="$2"
+    local skip_new_line="${3:-0}"
+
+    if [ ! -f "$file" ]; then
+        touch "$file"
+
+        # No need to add a new line if the file is brand new.
+        skip_new_line=1
+    fi
+
+    if ! grep -Fqs "^$text$" "$file"; then
+        if [ "$skip_new_line" -eq 1 ]; then
+            printf "%s\\n" "$text" >>"$file"
+        else
+            printf "\\n%s\\n" "$text" >>"$file"
+        fi
+    fi
+}
+
+add_to_path() {
+    local text="$1"
+
+    # Assumes a comment precedes this line.
+    append_to_file "$HOME/.localrc" "export PATH=\"$text:\$PATH\"" 1
+
+    export PATH="$1:$PATH"
+}
+
+# shellcheck disable=SC2154
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+
+set -e
+
+cat <<EOF
+Hi, $USER.
+Let's bootstrap your macOS machine for SugarCRM development.
+
+EOF
+
+# Start at home.
+cd "$HOME"
+
+# Homebrew is the source of so much.
+if ! command -v brew >/dev/null; then
+    curl -fsSL -H "Cache-Control: non-cache" "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
+    append_to_file "$HOME/.localrc" "# Recommended by brew doctor."
+    add_to_path "/usr/local/bin"
+else
+    brew update
+fi
+
+brew bundle --file=- <<EOF
+cask "code42-crashplan"
+cask "firefox"
+cask "google-chrome"
+cask "postman"
+cask "ringcentral"
+cask "ringcentral-meetings"
+cask "sequel-pro"
+
+mas "1password", id: 1333542190
+mas "slack", id: 803453959
+EOF
+
+# Automated installation of the Microsoft IE App Compat virtual machines.
+# source: https://xdissent.github.io/ievms/
+curl -fsSL -H "Cache-Control: non-cache" "https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh" | env IEVMS_VERSIONS="11 EDGE" bash
+find ~/.ievms -type f ! -name "*.vmdk" -exec rm {} \;
+
+cat <<EOF
+
+You're almost there! Let me give you a summary of some important things you should know.
+
+All shell customizations can be found in $HOME/.localrc. If it's not already, make sure you add the following to $HOME/.bashrc, $HOME/.bash_profile, $HOME/.zshrc, or whatever file you use.
+
+source \$HOME/.localrc
+
+VMs for IE 11 and Edge were installed. Launch VirtualBox and choose an ievms image to test in IE or Edge.
+
+Next, run one of the project-specific bootstrapping scripts.
+
+If you used the prescribed bootstrapping method, then the output of all of these commands was redirected to $HOME/.machine.sugar.log.
+Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats. I tried to follow any that I could, but I might have missed something that is important for you.
+EOF
