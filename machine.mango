@@ -17,7 +17,7 @@ append_to_file() {
         skip_new_line=1
     fi
 
-    if ! grep -Fqs "^$text$" "$file"; then
+    if ! grep -Fqsx "$text" "$file"; then
         if [ "$skip_new_line" -eq 1 ]; then
             printf "%s\\n" "$text" >>"$file"
         else
