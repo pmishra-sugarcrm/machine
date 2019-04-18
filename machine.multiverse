@@ -32,7 +32,7 @@ add_to_path() {
     # Assumes a comment precedes this line.
     append_to_file "$HOME/.localrc" "export PATH=\"$text:\$PATH\"" 1
 
-    export PATH="$1:$PATH"
+    export PATH="$text:$PATH"
 }
 
 # shellcheck disable=SC2154
