@@ -223,4 +223,5 @@ Install the elasticsearch head plugin at https://chrome.google.com/webstore/deta
 
 If you used the prescribed bootstrapping method, then the output of all of these commands was redirected to $HOME/.machine.mango.log.
 Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats.
+
 EOF

@@ -132,8 +132,8 @@ if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ]; then
 
     append_to_file "$HOME/.localrc" "# oh-my-zsh plugins"
     append_to_file "$HOME/.localrc" "# zsh-syntax-highlighting must be last" 1
-    append_to_file "$HOME/.localrc" "# Others worth considering: git-prompt, jump (Does it overlap with autojump?), kubectrl, minikube, per-directory-history (Does it overlap with dirhistory or history?), pj (Does it overlap with autojump?), thefuck (Conflicts with sudo.), vagrant-prompt, z (Does it overlap with autojump?), zsh-navigation-tools" 1
-    append_to_file "$HOME/.localrc" "plugins=(asdf autojump colored-man-pages command-not-found common-aliases compleat copybuffer copydir copyfile cp dirhistory dirpersist docker docker-compose dotenv extract git golang heroku history iwhois last-working-dir lol man npm osx perms sublime sudo themes timer tmux urltools vagrant vault web-search yarn wd zsh_reload zsh-history-substring-search zsh-autosuggestions zsh-completions zsh-syntax-highlighting)" 1
+    append_to_file "$HOME/.localrc" "# Others worth considering: git-prompt, jump (Does it overlap with autojump?), kubectrl, minikube, per-directory-history (Does it overlap with dirhistory or history?), pj (Does it overlap with autojump?), thefuck (Conflicts with sudo.), vagrant (Does it overlap with Homebrew's vagrant-completion?), vagrant-prompt, z (Does it overlap with autojump?), zsh-navigation-tools" 1
+    append_to_file "$HOME/.localrc" "plugins=(asdf autojump colored-man-pages command-not-found common-aliases compleat copybuffer copydir copyfile cp dirhistory dirpersist docker docker-compose dotenv extract git golang heroku history iwhois last-working-dir lol man npm osx perms sublime sudo themes timer tmux urltools vault web-search yarn wd zsh_reload zsh-history-substring-search zsh-autosuggestions zsh-completions zsh-syntax-highlighting)" 1
 
     append_to_file "$HOME/.localrc" "# Search history with arrow keys. Learn how to search your command history at https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys."
     append_to_file "$HOME/.localrc" "autoload -U up-line-or-beginning-search" 1
@@ -173,7 +173,6 @@ brew "rename"
 brew "shellcheck"
 brew "the_silver_searcher"
 brew "tmux"
-brew "vagrant-completion"
 brew "vim"
 brew "wget"
 brew "yarn"
@@ -183,7 +182,6 @@ cask "anki"
 cask "appcleaner"
 cask "docker"
 cask "dropbox"
-cask "firefox"
 cask "gimp"
 cask "google-chrome"
 cask "gpg-suite"
@@ -196,9 +194,6 @@ cask "plex-media-player"
 cask "postman"
 cask "sourcetree"
 cask "sublime-text"
-cask "vagrant"
-cask "vagrant-manager"
-cask "virtualbox"
 cask "visual-studio-code"
 cask "vlc"
 
@@ -312,6 +307,7 @@ Once in recovery mode open a new Terminal window from the Utilities menu and ent
 
 If you used the prescribed bootstrapping method, then the output of all of these commands was redirected to $HOME/.machine.me.log.
 Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats. I tried to follow any that I could, but I might have missed something that is important for you.
+
 EOF
 
 # Unhandled caveats:

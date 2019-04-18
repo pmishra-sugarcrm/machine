@@ -87,8 +87,11 @@ source \$HOME/.localrc
 
 VMs for IE 11 and Edge were installed. Launch VirtualBox and choose an ievms image to test in IE or Edge.
 
+Go to https://portal.office.com/account#installs to install Microsoft Office.
+
 Next, run one of the project-specific bootstrapping scripts.
 
 If you used the prescribed bootstrapping method, then the output of all of these commands was redirected to $HOME/.machine.sugar.log.
 Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats. I tried to follow any that I could, but I might have missed something that is important for you.
+
 EOF
