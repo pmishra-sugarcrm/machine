@@ -36,7 +36,7 @@ add_to_path() {
 }
 
 wait_for_user() {
-    read -n 1 -s -r -p "Press any key to continue..."
+    read -n 1 -s -r -p "Press any key to continue ..."
 }
 
 github_ssh_key() {
@@ -65,7 +65,6 @@ Before we get started, sign into the App Store. You should also take this time t
 Go ahead. I'll wait for you.
 EOF
 wait_for_user
-echo "Continuing..."
 
 echo "It is recommended that you update all of your software in the App Store and upgrade macOS if available. You can re-run this script when you are ready. Do you want to continue? (y/n)?"
 old_stty_cfg=$(stty -g)
@@ -76,7 +75,7 @@ if echo "$answer" | grep -iq "^n"; then
     echo "Come back when you're done."
     exit 0
 fi
-echo "Continuing..."
+echo "Here we go ..."
 
 # Start at home.
 cd "$HOME"
@@ -102,7 +101,6 @@ fi
 pbcopy <"$HOME/.ssh/id_rsa.pub"
 echo "Your SSH key was copied to your clipboard. If needed, go to https://github.com/settings/ssh/new to add your SSH key to Github. I'll wait for you."
 wait_for_user
-echo "Continuing..."
 
 # Homebrew is the source of so much.
 if ! command -v brew >/dev/null; then
@@ -186,7 +184,6 @@ cask "docker"
 cask "dropbox"
 cask "gimp"
 cask "google-chrome"
-cask "gpg-suite"
 cask "grammarly"
 cask "logitech-myharmony"
 cask "netspot"
@@ -257,6 +254,7 @@ brew "asdf"
 brew "autoconf"
 brew "automake"
 brew "coreutils"
+brew "curl"
 brew "gpg"
 brew "libtool"
 brew "libxslt"
@@ -264,6 +262,7 @@ brew "libyaml"
 brew "openssl"
 brew "readline"
 brew "unixodbc"
+brew "unzip"
 EOF
 
 append_to_file "$HOME/.localrc" "# Add asdf."
