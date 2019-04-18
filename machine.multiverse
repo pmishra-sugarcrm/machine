@@ -122,7 +122,7 @@ append_to_file "$HOME/.localrc" "source \$HOME/.asdf/completions/asdf.bash" 1
 # Install Node.js.
 if ! asdf plugin-list | grep -Fq "nodejs"; then
     asdf plugin-add nodejs
-    bash "$(brew --prefix)/opt/asdf/plugins/nodejs/bin/import-release-team-keyring"
+    bash "$HOME/.asdf/plugins/nodejs/bin/import-release-team-keyring"
 
     # Don't change the Node.js version unless installing in case the version needs to be pinned, like for Mango.
     asdf install nodejs 11.13.0
