@@ -77,6 +77,8 @@ EOF
 curl -fsSL -H "Cache-Control: non-cache" "https://raw.githubusercontent.com/xdissent/ievms/master/ievms.sh" | env IEVMS_VERSIONS="11 EDGE" bash
 find ~/.ievms -type f ! -name "*.vmdk" -exec rm {} \;
 
+brew doctor
+
 cat <<EOF
 
 You're almost there! Let me give you a summary of some important things you should know.

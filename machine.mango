@@ -188,6 +188,8 @@ if ! command -v srome >/dev/null; then
     chmod +x /usr/local/bin/srome
 fi
 
+brew doctor
+
 cat <<EOF
 
 That's a wrap! Let me give you a summary of some important things you should know.

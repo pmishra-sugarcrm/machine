@@ -131,6 +131,8 @@ else
     asdf plugin-update nodejs
 fi
 
+brew doctor
+
 cat <<EOF
 
 That's all folks! Let me give you a summary of some important things you should know.
