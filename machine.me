@@ -108,6 +108,7 @@ if ! command -v brew >/dev/null; then
     curl -fsSL -H "Cache-Control: non-cache" "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
     append_to_file "$HOME/.localrc" "# Recommended by brew doctor."
     add_to_path "/usr/local/bin"
+    add_to_path "/usr/local/sbin"
 else
     brew update
 fi
