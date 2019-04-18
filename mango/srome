@@ -30,15 +30,15 @@ if [[ -z "$version" ]]; then
     exit 0
 fi
 
-rome build --clean -d "$HOME/sugarcrm/www" -f "$flavor" -v "$version" "$HOME/sugarcrm/Mango/sugarcrm"
+rome build --clean -d "$HOME/sugarcrm/www" -f "$flavor" -v "$version" -l "dev" "$HOME/sugarcrm/Mango/sugarcrm"
 
 vagrant up
 
 echo "-
   source: $HOME/sugarcrm/www
-  target: /var/www/html/
+  target: /var/www/html/dev
 " >share.yaml
 
 vagrant reload
 
-open http://localhost:8080
+open http://localhost:8080/dev

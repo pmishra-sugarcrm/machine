@@ -71,9 +71,6 @@ cask "docker"
 cask "vagrant"
 cask "vagrant-manager"
 cask "virtualbox"
-
-tap "sugarcrm/devops", "git@github.com:sugarcrm/homebrew-devops.git"
-brew "build-monitor"
 EOF
 
 # Grab the multiverse source code.
@@ -164,11 +161,6 @@ if ! command -v rome >/dev/null; then
     rome self-update
 fi
 
-# Add a build-monitor configuration.
-if [ -f "$HOME/.build_monitor.yaml" ]; then
-    curl -fsSL -H "Cache-Control: non-cache" https://raw.github.com/glevine/machine/master/mango/.build_monitor.yaml -o "$HOME/.build_monitor.yaml"
-fi
-
 if [ ! -d "$HOME/sugarcrm/stacks" ]; then
     (
         cd "$HOME/sugarcrm"
@@ -210,16 +202,13 @@ The dev stacks have been installed to $HOME/sugarcrm/stacks. Note that upstream 
 
 You may use rome to build Mango. See the docs at https://github.com/jwhitcraft/rome/blob/master/docs/rome.md.
 srome wraps rome to build Mango in a dev stack.
+rome can also watch for source code changes and recompile files.
 
 \$ cd $HOME/sugarcrm/stacks/php73-mysql57
 \$ srome -f ult -v 9.1.0.0
+\$ rome watch --clean-cache -d $HOME/sugarcrm/www -f 9.1.0.0 -v ult -l "dev" $HOME/sugarcrm/Mango/sugarcrm
 
-build-monitor can watch for source code changes and recompile files. The configuration, which you might need to tailor to your liking, can be found at $HOME/.build_monitor.yaml.
-
-\$ cd $HOME
-\$ build-monitor -w ~/Mango
-
-After building Mango in a dev stack, you can reach it at http://localhost:8080.
+After building Mango in a dev stack, you can reach it on http://localhost:8080/dev.
 Use localhost:9900 for remote debugging.
 Connect to the MySQL server using \`mysql -u sugar -psugar -h 127.0.0.1 -P 8306\`.
 Install the elasticsearch head plugin at https://chrome.google.com/webstore/detail/elasticsearch-head/ffmkiejjmecolpfloofpjologoblkegm. Use localhost:8954.
