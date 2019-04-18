@@ -65,6 +65,7 @@ Before we get started, sign into the App Store. You should also take this time t
 Go ahead. I'll wait for you.
 EOF
 wait_for_user
+echo "Continuing..."
 
 echo "It is recommended that you update all of your software in the App Store and upgrade macOS if available. You can re-run this script when you are ready. Do you want to continue? (y/n)?"
 old_stty_cfg=$(stty -g)
@@ -75,6 +76,7 @@ if echo "$answer" | grep -iq "^n"; then
     echo "Come back when you're done."
     exit 0
 fi
+echo "Continuing..."
 
 # Start at home.
 cd "$HOME"
@@ -100,6 +102,7 @@ fi
 pbcopy <"$HOME/.ssh/id_rsa.pub"
 echo "Your SSH key was copied to your clipboard. If needed, go to https://github.com/settings/ssh/new to add your SSH key to Github. I'll wait for you."
 wait_for_user
+echo "Continuing..."
 
 # Homebrew is the source of so much.
 if ! command -v brew >/dev/null; then
@@ -159,7 +162,6 @@ brew "cheat"
 brew "coreutils"
 brew "dateutils"
 brew "ffind"
-brew "gist"
 brew "git"
 brew "grc"
 brew "grep"
@@ -248,9 +250,6 @@ git config --global core.excludesfile ~/.gitignore
 append_to_file "$HOME/.gitignore" "*~"
 append_to_file "$HOME/.gitignore" ".*.swp" 1
 append_to_file "$HOME/.gitignore" ".DS_Store" 1
-
-echo "Sign into gist ..."
-gist --login
 
 # Use asdf for managing language & runtime versions.
 brew bundle --file=- <<EOF
