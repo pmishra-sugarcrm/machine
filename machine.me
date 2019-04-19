@@ -85,6 +85,13 @@ cd "$HOME"
 # source: https://brettterpstra.com/2018/09/26/shell-tricks-toggling-dark-mode-from-terminal/
 osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to true'
 
+# Changing the clock display.
+# source: https://www.tech-otaku.com/mac/setting-the-date-and-time-format-for-the-macos-menu-bar-clock-using-terminal/
+defaults write com.apple.menuextra.clock DateFormat -string "EEE MMM d h:mm:ss a" && killall SystemUIServer
+
+# Show battery percentage.
+defaults write com.apple.menuextra.battery ShowPercent -bool true && killall SystemUIServer
+
 # Github SSH key.
 if [ -f "$HOME/.ssh/id_rsa" ]; then
     echo "It looks like you already have an SSH key. Do you need to generate a new one? (y/n)?"
