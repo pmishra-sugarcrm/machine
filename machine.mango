@@ -189,6 +189,10 @@ if ! command -v srome >/dev/null; then
     chmod +x /usr/local/bin/srome
 fi
 
+# Visual Studio Code extensions.
+code --install-extension felixfbecker.php-debug
+code --install-extension ikappas.phpcs
+
 brew doctor
 
 cat <<EOF
