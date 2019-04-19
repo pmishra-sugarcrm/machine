@@ -164,6 +164,7 @@ tap "homebrew/cask-drivers"
 tap "homebrew/command-not-found"
 
 brew "ack"
+brew "asciinema"
 brew "base64"
 brew "cheat"
 brew "coreutils"
@@ -219,43 +220,47 @@ EOF
 append_to_file "$HOME/.tmux.conf" "set-option -g default-command \"reattach-to-user-namespace -l zsh\""
 
 # Configure Git.
-echo "Let's configure Git ..."
-
 append_to_file "$HOME/.localrc" "# Use code to launch Visual Studio Code. Allows VS Code to be used as the Git editor."
 add_to_path "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
-read -r -p "What is your Git author name? " username
-git config --global user.name "$username"
-read -r -p "What is your Git email address? " email
-git config --global user.email "$email"
-git config --global credential.helper osxkeychain
-git config --global alias.amend "commit --amend"
-git config --global alias.b branch
-git config --global alias.co checkout
-git config --global alias.cob "checkout -b"
-git config --global alias.cp "cherry-pick"
-git config --global alias.r "remote -v"
-git config --global alias.ra "remote add"
-git config --global alias.rb "rebase -i"
-git config --global alias.smi "submodule init"
-git config --global alias.smu "submodule update"
-git config --global alias.st status
-git config --global alias.unstage "reset --soft HEAD^"
-git config --global core.autocrlf input
-git config --global core.editor "code --wait"
-git config --global core.whitespace -blank-at-eof,tab-in-indent
-git config --global diff.tool vscode
-git config --global difftool.vscode.cmd "code --wait --diff $LOCAL $REMOTE"
-git config --global difftool.prompt false
-git config --global help.autocorrect 1
-git config --global mergetool.keepBackup false
-git config --global push.default simple
-
 # Always ignore these files.
-git config --global core.excludesfile ~/.gitignore
 append_to_file "$HOME/.gitignore" "*~"
 append_to_file "$HOME/.gitignore" ".*.swp" 1
 append_to_file "$HOME/.gitignore" ".DS_Store" 1
+
+if [ ! -f "$HOME/.gitconfig" ]; then
+    echo "Let's configure Git ..."
+
+    read -r -p "What is your Git author name? " username
+    git config --global user.name "$username"
+
+    read -r -p "What is your Git email address? " email
+    git config --global user.email "$email"
+
+    git config --global credential.helper osxkeychain
+    git config --global alias.amend "commit --amend"
+    git config --global alias.b branch
+    git config --global alias.co checkout
+    git config --global alias.cob "checkout -b"
+    git config --global alias.cp "cherry-pick"
+    git config --global alias.r "remote -v"
+    git config --global alias.ra "remote add"
+    git config --global alias.rb "rebase -i"
+    git config --global alias.smi "submodule init"
+    git config --global alias.smu "submodule update"
+    git config --global alias.st status
+    git config --global alias.unstage "reset --soft HEAD^"
+    git config --global core.autocrlf input
+    git config --global core.editor "code --wait"
+    git config --global core.excludesfile ~/.gitignore
+    git config --global core.whitespace -blank-at-eof,tab-in-indent
+    git config --global diff.tool vscode
+    git config --global difftool.vscode.cmd "code --wait --diff $LOCAL $REMOTE"
+    git config --global difftool.prompt false
+    git config --global help.autocorrect 1
+    git config --global mergetool.keepBackup false
+    git config --global push.default simple
+fi
 
 # Use asdf for managing language & runtime versions.
 brew bundle --file=- <<EOF
