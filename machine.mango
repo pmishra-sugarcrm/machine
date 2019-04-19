@@ -76,9 +76,10 @@ EOF
 
 # Some Mango dependencies -- installed via composer -- require ext-gmp.
 # Homebrew's PHP comes with ext-gmp.
-# Must source .localrc to make sure that Homebrew's PHP is picked up before the system PHP.
 (brew services start php || brew services restart php)
-source $HOME/.localrc
+
+# Make sure Homebrew's PHP is used in the rest of this script.
+export PATH="$(brew --prefix php)/bin:$PATH"
 
 # Set up Vagrant.
 sudo chown -R "$USER":staff "$HOME/.vagrant.d"
