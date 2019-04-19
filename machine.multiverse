@@ -93,6 +93,7 @@ append_to_file "$HOME/.localrc" "# multiverse/tools/bin should be in your path."
 add_to_path "\$HOME/sugarcrm/multiverse/tools/bin"
 
 # Enable minikube addons.
+minikube start
 minikube addons enable ingress
 minikube addons enable heapster
 minikube addons configure registry-creds
