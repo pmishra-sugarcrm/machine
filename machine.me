@@ -268,8 +268,7 @@ brew "unzip"
 EOF
 
 append_to_file "$HOME/.localrc" "# Add asdf."
-append_to_file "$HOME/.localrc" "source \$HOME/.asdf/asdf.sh" 1
-append_to_file "$HOME/.localrc" "source \$HOME/.asdf/completions/asdf.bash" 1
+append_to_file "$HOME/.localrc" "source $(brew --prefix asdf)/asdf.sh" 1
 
 # Install Node.js.
 if ! asdf plugin-list | grep -Fq "nodejs"; then
