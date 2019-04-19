@@ -62,6 +62,7 @@ fi
 brew bundle --file=- <<EOF
 brew "composer"
 brew "git"
+brew "php"
 brew "php-code-sniffer"
 brew "phpmd"
 brew "vagrant-completion"
@@ -72,6 +73,17 @@ cask "vagrant"
 cask "vagrant-manager"
 cask "virtualbox"
 EOF
+
+# Some Mango dependencies -- installed via composer -- require ext-gmp.
+# Homebrew's PHP comes with ext-gmp.
+# Must source .localrc to make sure that Homebrew's PHP is picked up before the system PHP.
+brew services start php
+source $HOME/.localrc
+
+# Set up Vagrant.
+sudo chown -R "$USER":staff "$HOME/.vagrant.d"
+vagrant plugin install vagrant-cachier
+vagrant plugin install vagrant-vbguest
 
 # Grab the multiverse source code.
 if [ ! -d "$HOME/sugarcrm/" ]; then
@@ -133,8 +145,7 @@ brew "unixodbc"
 EOF
 
 append_to_file "$HOME/.localrc" "# Add asdf."
-append_to_file "$HOME/.localrc" "source \$HOME/.asdf/asdf.sh" 1
-append_to_file "$HOME/.localrc" "source \$HOME/.asdf/completions/asdf.bash" 1
+append_to_file "$HOME/.localrc" "source $(brew --prefix asdf)/asdf.sh" 1
 
 # Install Node.js.
 if ! asdf plugin-list | grep -Fq "nodejs"; then
@@ -169,10 +180,6 @@ if [ ! -d "$HOME/sugarcrm/stacks" ]; then
         git remote add origin "git@github.com:$USER/stacks.git"
         sudo bash ./prereq.sh
     )
-
-    vagrant plugin install vagrant-cachier
-    vagrant plugin install vagrant-vbguest
-    chown -R "$USER:staff" "$HOME/.vagrant.d"
 fi
 
 # srome wraps rome to build Mango in a dev stack.
