@@ -283,9 +283,6 @@ else
     asdf plugin-update nodejs
 fi
 
-# shellcheck source=/dev/null
-source "$HOME/.zshrc"
-
 brew doctor
 
 cat <<EOF
@@ -312,5 +309,5 @@ Carefully read through the output to determine if you need to perform any additi
 
 EOF
 
-# Unhandled caveats:
-#    openssl
+# Replace the current shell with zsh.
+exec $(which zsh)
