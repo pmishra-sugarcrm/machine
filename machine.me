@@ -3,7 +3,7 @@
 # This script has been modeled after https://github.com/thoughtbot/laptop.
 
 # Run via:
-# $ bash -c "$(curl -fsSL -H 'Cache-Control: non-cache' https://raw.github.com/glevine/machine/master/machine.me)" 2>&1 | tee ~/.machine.me.log
+# $ bash -c "$(curl -fsSL -H 'Cache-Control: no-cache' https://raw.github.com/glevine/machine/master/machine.me)" 2>&1 | tee ~/.machine.me.log
 
 append_to_file() {
     local file="$1"
@@ -112,7 +112,7 @@ wait_for_user
 
 # Homebrew is the source of so much.
 if ! command -v brew >/dev/null; then
-    curl -fsSL -H "Cache-Control: non-cache" "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
+    curl -fsSL -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
     append_to_file "$HOME/.localrc" "# Recommended by brew doctor."
     add_to_path "/usr/local/bin"
     add_to_path "/usr/local/sbin"
@@ -130,7 +130,7 @@ if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ]; then
 
     # Better yet, oh my zsh!
     # Trick the oh my zsh! installer into thinking that the terminal was restarted after changing the login shell.
-    curl -fsSL -H "Cache-Control: non-cache" "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" | SHELL=/usr/local/bin/zsh sh
+    curl -fsSL -H "Cache-Control: no-cache" "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" | SHELL=/usr/local/bin/zsh sh
 
     # zsh-autosuggestions
     git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"

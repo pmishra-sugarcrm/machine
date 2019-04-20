@@ -3,7 +3,7 @@
 # This script has been modeled after https://github.com/thoughtbot/laptop.
 
 # Run via:
-# $ bash -c "$(curl -fsSL -H 'Cache-Control: non-cache' https://raw.github.com/glevine/machine/master/machine.mango)" 2>&1 | tee ~/.machine.mango.log
+# $ bash -c "$(curl -fsSL -H 'Cache-Control: no-cache' https://raw.github.com/glevine/machine/master/machine.mango)" 2>&1 | tee ~/.machine.mango.log
 
 append_to_file() {
     local file="$1"
@@ -51,7 +51,7 @@ cd "$HOME"
 
 # Homebrew is the source of so much.
 if ! command -v brew >/dev/null; then
-    curl -fsSL -H "Cache-Control: non-cache" "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
+    curl -fsSL -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/Homebrew/install/master/install" | ruby
     append_to_file "$HOME/.localrc" "# Recommended by brew doctor."
     add_to_path "/usr/local/bin"
     add_to_path "/usr/local/sbin"
@@ -107,27 +107,27 @@ if [ ! -d "$HOME/sugarcrm/Mango" ]; then
 fi
 
 if [ -f "$HOME/sugarcrm/Mango/.git/hooks/post-merge" ]; then
-    curl -fsSL -H "Cache-Control: non-cache" https://raw.github.com/glevine/machine/master/mango/post-merge -o "$HOME/sugarcrm/Mango/.git/hooks/post-merge"
+    curl -fsSL -H "Cache-Control: no-cache" https://raw.github.com/glevine/machine/master/mango/post-merge -o "$HOME/sugarcrm/Mango/.git/hooks/post-merge"
     chmod +x "$HOME/sugarcrm/Mango/.git/hooks/post-merge"
 fi
 
 if [ -f "$HOME/sugarcrm/Mango/.git/hooks/post-rebase" ]; then
-    curl -fsSL -H "Cache-Control: non-cache" https://raw.github.com/glevine/machine/master/mango/post-rebase -o "$HOME/sugarcrm/Mango/.git/hooks/post-rebase"
+    curl -fsSL -H "Cache-Control: no-cache" https://raw.github.com/glevine/machine/master/mango/post-rebase -o "$HOME/sugarcrm/Mango/.git/hooks/post-rebase"
     chmod +x "$HOME/sugarcrm/Mango/.git/hooks/post-rebase"
 fi
 
 if [ -f "$HOME/sugarcrm/Mango/.git/hooks/post-checkout" ]; then
-    curl -fsSL -H "Cache-Control: non-cache" https://raw.github.com/glevine/machine/master/mango/post-checkout -o "$HOME/sugarcrm/Mango/.git/hooks/post-checkout"
+    curl -fsSL -H "Cache-Control: no-cache" https://raw.github.com/glevine/machine/master/mango/post-checkout -o "$HOME/sugarcrm/Mango/.git/hooks/post-checkout"
     chmod +x "$HOME/sugarcrm/Mango/.git/hooks/post-checkout"
 fi
 
 if [ -f "$HOME/sugarcrm/Mango/.git/hooks/pre-commit" ]; then
-    curl -fsSL -H "Cache-Control: non-cache" https://raw.github.com/glevine/machine/master/mango/pre-commit -o "$HOME/sugarcrm/Mango/.git/hooks/pre-commit"
+    curl -fsSL -H "Cache-Control: no-cache" https://raw.github.com/glevine/machine/master/mango/pre-commit -o "$HOME/sugarcrm/Mango/.git/hooks/pre-commit"
     chmod +x "$HOME/sugarcrm/Mango/.git/hooks/pre-commit"
 fi
 
 # source: https://github.com/alias-mac/dotfiles/blob/master/bin/git-psr2
-curl -fsSL -H "Cache-Control: non-cache" https://raw.githubusercontent.com/alias-mac/dotfiles/master/bin/git-psr2 -o /usr/local/bin/git-psr2
+curl -fsSL -H "Cache-Control: no-cache" https://raw.githubusercontent.com/alias-mac/dotfiles/master/bin/git-psr2 -o /usr/local/bin/git-psr2
 chmod +x /usr/local/bin/git-psr2
 
 # Use asdf for managing language & runtime versions.
@@ -163,7 +163,7 @@ asdf global nodejs 8.9.4
 # Use rome to build Mango.
 # source: https://github.com/jwhitcraft/rome
 if ! command -v rome >/dev/null; then
-    curl -fsSL -H "Cache-Control: non-cache" "http://h2ik.co/rome/rome-$(uname -s)-$(uname -m)" -o /usr/local/bin/rome
+    curl -fsSL -H "Cache-Control: no-cache" "http://h2ik.co/rome/rome-$(uname -s)-$(uname -m)" -o /usr/local/bin/rome
     chmod +x /usr/local/bin/rome
 
     if [ ! -d "$HOME/sugarcrm/www/" ]; then
@@ -185,7 +185,7 @@ fi
 
 # srome wraps rome to build Mango in a dev stack.
 if ! command -v srome >/dev/null; then
-    curl -fsSL -H "Cache-Control: non-cache" https://raw.github.com/glevine/machine/master/mango/srome -o /usr/local/bin/srome
+    curl -fsSL -H "Cache-Control: no-cache" https://raw.github.com/glevine/machine/master/mango/srome -o /usr/local/bin/srome
     chmod +x /usr/local/bin/srome
 fi
 
