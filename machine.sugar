@@ -59,14 +59,16 @@ else
     brew update
 fi
 
+# virtualbox is first because it will always fail the first time. Fail early, approve the system extension, and re-run the script.
+# source: https://developer.apple.com/library/archive/technotes/tn2459/_index.html
 brew bundle --file=- <<EOF
+cask "virtualbox"
 cask "firefox"
 cask "google-chrome"
 cask "postman"
 cask "ringcentral"
 cask "ringcentral-meetings"
 cask "sequel-pro"
-cask "virtualbox"
 
 mas "1password", id: 1333542190
 mas "slack", id: 803453959
