@@ -128,10 +128,9 @@ if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ]; then
     # Make zsh the default shell.
     sudo dscl . -create "/Users/$USER" UserShell /usr/local/bin/zsh
 
-    echo "shell: $SHELL"
-
     # Better yet, oh my zsh!
-    curl -fsSL -H "Cache-Control: non-cache" "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" | sh
+    # Trick the oh my zsh! installer into thinking that the terminal was restarted after changing the login shell.
+    curl -fsSL -H "Cache-Control: non-cache" "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" | SHELL=/usr/local/bin/zsh sh
 
     # zsh-autosuggestions
     git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
@@ -329,3 +328,6 @@ If you used the prescribed bootstrapping method, then the output of all of these
 Carefully read through the output to determine if you need to perform any additional steps, like following Homebrew caveats. I tried to follow any that I could, but I might have missed something that is important for you.
 
 EOF
+
+# Replace the current shell with zsh so the user doesn't have to restart the terminal.
+env zsh -l
