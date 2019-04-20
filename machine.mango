@@ -82,7 +82,12 @@ EOF
 export PATH="$(brew --prefix php)/bin:$PATH"
 
 # Set up Vagrant.
-sudo chown -R "$USER":staff "$HOME/.vagrant.d"
+if [ -d "$HOME/.vagrant.d/" ]; then
+    sudo chown -R "$USER":staff "$HOME/.vagrant.d"
+else
+    mkdir "$HOME/.vagrant.d"
+fi
+
 vagrant plugin install vagrant-cachier
 vagrant plugin install vagrant-vbguest
 
