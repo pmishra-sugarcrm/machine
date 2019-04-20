@@ -128,9 +128,7 @@ if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ]; then
     # Make zsh the default shell.
     sudo dscl . -create "/Users/$USER" UserShell /usr/local/bin/zsh
 
-    # Replace the current shell with zsh.
-    # Let's do this before oh my zsh! is installed so that the right zsh is used. I was noticing that oh my zsh! was using /bin/zsh instead.
-    exec $(which zsh)
+    echo "shell: $SHELL"
 
     # Better yet, oh my zsh!
     curl -fsSL -H "Cache-Control: non-cache" "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" | sh
