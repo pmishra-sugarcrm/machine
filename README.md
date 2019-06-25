@@ -33,11 +33,7 @@ pip install --user ansible
 ## download playbooks
 
 ```shell
-mkdir -p "$HOME/github.com/glevine"
-
-cd "$HOME/github.com/glevine"
-
-git clone -o upstream https://github.com/glevine/machine.git
+git clone -o upstream https://github.com/glevine/machine.git "$HOME/github.com/glevine/machine"
 ```
 
 ## execute playbook
