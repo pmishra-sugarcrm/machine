@@ -102,7 +102,7 @@
         - { name: alias.unstage, value: reset --soft HEAD^ }
         - { name: core.autocrlf, value: input }
         - { name: core.editor, value: code --wait }
-        - { name: core.excludesfile, value: "{{ lookup('env','HOME') }}/.gitignore" }
+        - { name: core.excludesfile, value: ~/.gitignore }
         - { name: core.whitespace, value: "-blank-at-eof,tab-in-indent" }
         - { name: diff.tool, value: vscode }
         - { name: difftool.vscode.cmd, value: code --wait --diff $LOCAL $REMOTE }
