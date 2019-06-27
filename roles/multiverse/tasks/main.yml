@@ -24,6 +24,6 @@
     line: export PATH="$PATH:{{ lookup('env','HOME') }}/go/src/github.com/sugarcrm/multiverse/tools/bin"
 - name: auto-completion
   lineinfile:
-    path: "{{ lookup('env','HOME') }}/.machine"
+    path: "{{ lookup('env','HOME') }}/.bashrc"
     create: yes
     line: source {{ lookup('env','HOME') }}/go/src/github.com/sugarcrm/multiverse/tools/complete.bash
