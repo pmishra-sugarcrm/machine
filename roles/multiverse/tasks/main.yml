@@ -26,4 +26,4 @@
   lineinfile:
     path: "{{ lookup('env','HOME') }}/.machine"
     create: yes
-    line: source {{ lookup('env','HOME') }}/go/src/github.com/sugarcrm/multiverse/tools/completion.bash
+    line: source {{ lookup('env','HOME') }}/go/src/github.com/sugarcrm/multiverse/tools/complete.bash
