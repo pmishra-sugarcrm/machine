@@ -15,9 +15,6 @@ sudo launchctl limit maxfiles unlimited
 
 # Accept the Xcode license agreement.
 sudo xcodebuild -license accept
-
-# Make sure that command line tools are installed.
-xcode-select --install
 ```
 
 ## install ansible
