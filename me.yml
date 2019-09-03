@@ -120,6 +120,8 @@
       - coreutils
       - dateutils
       - ffind
+      - findutils
+      - gnu-sed
       - grc
       - grep
       - handbrake
