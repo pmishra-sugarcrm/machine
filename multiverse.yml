@@ -41,6 +41,9 @@
       name: "{{ item }}"
     loop:
       - awscli
+      - coreutils
+      - findutils
+      - gnu-sed
       - hugo
   - include_role:
       name: ohmyzsh
