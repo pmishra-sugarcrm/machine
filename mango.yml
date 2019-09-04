@@ -12,12 +12,6 @@
   - include_role:
       name: mango
   - include_role:
-      name: vscode
-    vars:
-      extensions:
-        - felixfbecker.php-debug
-        - ikappas.phpcs
-  - include_role:
       name: volta
   - name: node
     # Sidecar requires a Node.js >= 8.9.2. Seedbed requires 8.x. Sidecar docs
@@ -48,9 +42,3 @@
       name: stacks
   - include_role:
       name: rome2stack
-  - include_role:
-      name: ohmyzsh
-    vars:
-      plugins:
-       - docker
-       - docker-compose

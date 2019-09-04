@@ -9,14 +9,6 @@
   - include_role:
       name: multiverse
   - include_role:
-      name: vscode
-    vars:
-      extensions:
-        - googlecloudtools.cloudcode
-        - ms-kubernetes-tools.vscode-kubernetes-tools
-        - ms-vscode.go
-        - zxh404.vscode-proto3
-  - include_role:
       name: golang
   - include_role:
       name: volta
@@ -34,7 +26,9 @@
       name: minikube
     vars:
       hosts:
-        - 127.0.0.1 velcro-office365-rest.sugar.multiverse
+        - 127.0.0.1 stargate-app-center.sugar.multiverse
+        - 127.0.0.1 stargate-appcatalog.sugar.multiverse
+        - 127.0.0.1 stargate-cloudhome.sugar.multiverse
   - include_role:
       name: homebrew
   - homebrew:
@@ -42,10 +36,3 @@
     loop:
       - awscli
       - hugo
-  - include_role:
-      name: ohmyzsh
-    vars:
-      plugins:
-       - docker
-       - docker-compose
-       - golang
